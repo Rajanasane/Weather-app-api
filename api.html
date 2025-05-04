@@ -1,0 +1,91 @@
+<html>
+<head>
+    <title>Weather App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="api.css">
+</head>
+<body>
+    <div class="row">
+        <input type="text" id="citybox" placeholder="Enter city">
+        <button onclick="getWeather()">Get Weather</button>
+    </div>
+    <div class="container">
+        <div class="card">
+            <h2><i class="fa fa-map-marker"></i> <span id="location"></span></h2>
+            <h6 id="weather"></h6>
+            <h4 id="temp"></h4>
+            <img src="" id="icon">
+            <!-- JS function -->
+            <button onclick="refreshWeather()" class="refresh"><i class="fa fa-refresh"></i></button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script>
+        // Weather Fetch Function
+        function getWeather(defaultCity = "") {
+            const apiKey = "aef289bec57e09585cdad66a865bb6f3";
+            const cityInput = document.getElementById("citybox").value.trim();
+            const city = cityInput || defaultCity;
+
+            if (city === "") {
+                alert("Please enter a city name");
+                return;
+            }
+
+            // Save to localStorage in browser
+            localStorage.setItem("lastCity", city);
+
+            const link = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+            const request = new XMLHttpRequest();
+            request.open('GET', link, true);
+            request.onload = function () {
+                if (request.status >= 200 && request.status < 400) {
+                    const obj = JSON.parse(this.response);
+                    console.log(obj);
+
+                    document.getElementById('location').innerHTML = obj.name;
+                    document.getElementById('weather').innerHTML = obj.weather[0].description;
+                    document.getElementById('temp').innerHTML = Math.round(obj.main.temp) + "<sup>o</sup>C";
+                    document.getElementById('icon').src = "https://openweathermap.org/img/wn/" + obj.weather[0].icon + ".png";
+                } else {
+                    alert("City not found! Please enter correct city name.");
+                }
+            };
+
+            request.onerror = function () {
+                alert("Connection error! Please check your internet connection.");
+            };
+
+            request.send();
+        }
+
+        // Refresh without reloading the page
+        function refreshWeather() {
+            const lastCity = localStorage.getItem("lastCity") || "Pune";
+            document.getElementById("citybox").value = lastCity;
+            getWeather(lastCity);
+        }
+
+        // On Page Load: Load last searched city or default "Pune"
+        window.onload = function () {
+    const savedCity = localStorage.getItem("lastCity");
+
+    if (savedCity) {
+        getWeather(savedCity);
+    } else {
+        getWeather("Pune"); // load default only if no city saved
+    }
+
+    // Always keep the input box empty
+    document.getElementById("citybox").value = "";
+};
+``
+
+    </script>
+</body>
+</html>
